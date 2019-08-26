@@ -88,26 +88,26 @@ int main(int argc, char *argv[]) {
 
     Log::trace("Launcher", "Loading whitelist and operator list");
     Whitelist whitelist;
-        Legacy::Pre_1_13::PermissionsFile permissionsFile (PathHelper::getPrimaryDataDirectory() + "permissions.json");
+    Legacy::Pre_1_13::PermissionsFile permissionsFile (PathHelper::getPrimaryDataDirectory() + "permissions.json");
 
-        Log::trace("Launcher", "Setting up level settings");
-        LevelSettings levelSettings;
-        levelSettings.seed = LevelSettings::parseSeedString(props.worldSeed.get(), Level::createRandomSeed());
-        levelSettings.gametype = props.gamemode;
-        levelSettings.forceGameType = props.forceGamemode;
-        levelSettings.difficulty = props.difficulty;
-        levelSettings.dimension = 0;
-        levelSettings.generator = props.worldGenerator;
-        levelSettings.edu = false;
-        levelSettings.mpGame = true;
-        levelSettings.lanBroadcast = true;
-        levelSettings.commandsEnabled = true;
-        levelSettings.texturepacksRequired = false;
-        levelSettings.defaultSpawnX = INT_MIN;
-        levelSettings.defaultSpawnY = INT_MIN;
-        levelSettings.defaultSpawnZ = INT_MIN;
+    Log::trace("Launcher", "Setting up level settings");
+    LevelSettings levelSettings;
+    levelSettings.seed = LevelSettings::parseSeedString(props.worldSeed.get(), Level::createRandomSeed());
+    levelSettings.gametype = props.gamemode;
+    levelSettings.forceGameType = props.forceGamemode;
+    levelSettings.difficulty = props.difficulty;
+    levelSettings.dimension = 0;
+    levelSettings.generator = props.worldGenerator;
+    levelSettings.edu = false;
+    levelSettings.mpGame = true;
+    levelSettings.lanBroadcast = true;
+    levelSettings.commandsEnabled = true;
+    levelSettings.texturepacksRequired = false;
+    levelSettings.defaultSpawnX = INT_MIN;
+    levelSettings.defaultSpawnY = INT_MIN;
+    levelSettings.defaultSpawnZ = INT_MIN;
 
-        Log::trace("Launcher", "Initializing FilePathManager");
+    Log::trace("Launcher", "Initializing FilePathManager");
     Legacy::Pre_1_13::Core::FilePathManager pathmgr(appPlatform->getCurrentStoragePath(), false);
     pathmgr.setPackagePath(appPlatform->getPackagePath());
     pathmgr.setSettingsPath(pathmgr.getRootPath());
