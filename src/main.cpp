@@ -11,7 +11,6 @@
 #include <minecraft/FilePathManager.h>
 #include <minecraft/legacy/FilePathManager.h>
 #include <minecraft/AppResourceLoader.h>
-#include <minecraft/legacy/AppResourceLoader.h>
 #include <minecraft/MinecraftEventing.h>
 #include <minecraft/legacy/MinecraftEventing.h>
 #include <minecraft/ResourcePack.h>
@@ -26,7 +25,6 @@
 #include <minecraft/Minecraft.h>
 #include <minecraft/I18n.h>
 #include <minecraft/ServerCommandOrigin.h>
-#include <minecraft/legacy/ServerCommandOrigin.h>
 #include <minecraft/MinecraftCommands.h>
 #include <mcpelauncher/mod_loader.h>
 #include <argparser.h>
