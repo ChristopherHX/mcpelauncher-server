@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
     levelSettings.defaultSpawnZ = INT_MIN;
 
     Log::trace("Launcher", "Initializing FilePathManager");
-    Legacy::Pre_1_13::Core::FilePathManager pathmgr(appPlatform->getCurrentStoragePath(), false);
+    Legacy::Pre_1_13::Core::FilePathManager pathmgr (appPlatform->getCurrentStoragePath(), false);
     pathmgr.setPackagePath(appPlatform->getPackagePath());
     pathmgr.setSettingsPath(pathmgr.getRootPath());
     Log::trace("Launcher", "Initializing resource loaders");
