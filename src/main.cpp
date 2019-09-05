@@ -114,9 +114,9 @@ int main(int argc, char *argv[]) {
     // ResourceLoaders::registerLoader((ResourceFileSystem) 0xA, std::unique_ptr<ResourceLoader>(new AppResourceLoader([&pathmgr] { return ""; })));
 
     Log::trace("Launcher", "Initializing MinecraftEventing (create instance)");
+    MinecraftEventing eventing (pathmgr.getRootPath());
     /*Log::trace("Launcher", "Social::UserManager::CreateUserManager()");
     auto userManager = Social::UserManager::CreateUserManager();*/
-    MinecraftEventing eventing (pathmgr.getRootPath());
     Log::trace("Launcher", "Initializing MinecraftEventing (init call)");
     eventing.init();
     Log::trace("Launcher", "Initializing ResourcePackManager");
