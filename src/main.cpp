@@ -3,25 +3,18 @@
 #include <mcpelauncher/crash_handler.h>
 #include <minecraft/Common.h>
 #include <mcpelauncher/app_platform.h>
-#include <mcpelauncher/minecraft_version.h>
 #include <minecraft/Whitelist.h>
-#include <minecraft/legacy/PermissionsFile.h>
 #include <minecraft/PermissionsFile.h>
 #include <minecraft/LevelSettings.h>
 #include <minecraft/FilePathManager.h>
-#include <minecraft/legacy/FilePathManager.h>
 #include <minecraft/AppResourceLoader.h>
 #include <minecraft/MinecraftEventing.h>
-#include <minecraft/legacy/MinecraftEventing.h>
 #include <minecraft/ResourcePack.h>
-#include <minecraft/legacy/ResourcePack.h>
 #include <minecraft/ResourcePackStack.h>
 #include <minecraft/SaveTransactionManager.h>
 #include <minecraft/AutomationClient.h>
 #include <minecraft/ExternalFileLevelStorageSource.h>
-#include <minecraft/legacy/ExternalFileLevelStorageSource.h>
 #include <minecraft/ServerInstance.h>
-#include <minecraft/legacy/ServerInstance.h>
 #include <minecraft/Minecraft.h>
 #include <minecraft/I18n.h>
 #include <minecraft/ServerCommandOrigin.h>
@@ -86,7 +79,7 @@ int main(int argc, char *argv[]) {
 
     Log::trace("Launcher", "Loading whitelist and operator list");
     Whitelist whitelist;
-    Legacy::Pre_1_13::PermissionsFile permissionsFile (PathHelper::getPrimaryDataDirectory() + "permissions.json");
+    PermissionsFile permissionsFile (PathHelper::getPrimaryDataDirectory() + "permissions.json");
 
     Log::trace("Launcher", "Setting up level settings");
     LevelSettings levelSettings;
@@ -106,15 +99,24 @@ int main(int argc, char *argv[]) {
     levelSettings.defaultSpawnZ = INT_MIN;
 
     Log::trace("Launcher", "Initializing FilePathManager");
-    Legacy::Pre_1_13::Core::FilePathManager pathmgr (appPlatform->getCurrentStoragePath(), false);
+    Core::FilePathManager pathmgr (appPlatform->getCurrentStoragePath(), false);
     pathmgr.setPackagePath(appPlatform->getPackagePath());
     pathmgr.setSettingsPath(pathmgr.getRootPath());
     Log::trace("Launcher", "Initializing resource loaders");
     ResourceLoaders::registerLoader((ResourceFileSystem) 1, std::unique_ptr<ResourceLoader>(new AppResourceLoader([&pathmgr] { return pathmgr.getPackagePath(); })));
+    // ResourceLoaders::registerLoader((ResourceFileSystem) 7, std::unique_ptr<ResourceLoader>(new AppResourceLoader([&pathmgr] { return pathmgr.getDataUrl(); })));
     ResourceLoaders::registerLoader((ResourceFileSystem) 8, std::unique_ptr<ResourceLoader>(new AppResourceLoader([&pathmgr] { return pathmgr.getUserDataPath(); })));
     ResourceLoaders::registerLoader((ResourceFileSystem) 4, std::unique_ptr<ResourceLoader>(new AppResourceLoader([&pathmgr] { return pathmgr.getSettingsPath(); })));
+    // ResourceLoaders::registerLoader((ResourceFileSystem) 5, std::unique_ptr<ResourceLoader>(new AppResourceLoader([&pathmgr] { return pathmgr.getExternalFilePath(); })));
+    // ResourceLoaders::registerLoader((ResourceFileSystem) 2, std::unique_ptr<ResourceLoader>(new AppResourceLoader([&pathmgr] { return ""; })));
+    // ResourceLoaders::registerLoader((ResourceFileSystem) 3, std::unique_ptr<ResourceLoader>(new AppResourceLoader([&pathmgr] { return ""; })));
+    // ResourceLoaders::registerLoader((ResourceFileSystem) 9, std::unique_ptr<ResourceLoader>(new ScreenshotLoader));
+    // ResourceLoaders::registerLoader((ResourceFileSystem) 0xA, std::unique_ptr<ResourceLoader>(new AppResourceLoader([&pathmgr] { return ""; })));
+
     Log::trace("Launcher", "Initializing MinecraftEventing (create instance)");
-    Legacy::Pre_1_13::MinecraftEventing eventing (pathmgr.getRootPath());
+    /*Log::trace("Launcher", "Social::UserManager::CreateUserManager()");
+    auto userManager = Social::UserManager::CreateUserManager();*/
+    MinecraftEventing eventing (pathmgr.getRootPath());
     Log::trace("Launcher", "Initializing MinecraftEventing (init call)");
     eventing.init();
     Log::trace("Launcher", "Initializing ResourcePackManager");
@@ -130,14 +132,10 @@ int main(int argc, char *argv[]) {
     Log::trace("Launcher", "Initializing PackSourceFactory");
     PackSourceFactory packSourceFactory;
     Log::trace("Launcher", "Initializing ResourcePackRepository");
-    Legacy::Pre_1_13::ResourcePackRepository resourcePackRepo (eventing, packManifestFactory, skinPackKeyProvider, &pathmgr, packSourceFactory, false);
+    ResourcePackRepository resourcePackRepo (eventing, packManifestFactory, skinPackKeyProvider, &pathmgr, packSourceFactory, false);
     Log::trace("Launcher", "Adding vanilla resource pack");
     std::unique_ptr<ResourcePackStack> stack (new ResourcePackStack());
-    Log::trace("Launcher", "create PackInstance instance %d", (int)resourcePackRepo.vanillaPack);
-    PackInstance vpack(resourcePackRepo.vanillaPack, -1, false, nullptr);
-    Log::trace("Launcher", "Adding PackInstance instance");
-    stack->add(vpack, (ResourcePackRepository&)resourcePackRepo, false);
-    Log::trace("Launcher", "Set Resstack");
+    stack->add(PackInstance(resourcePackRepo.vanillaPack, -1, false, nullptr), resourcePackRepo, false);
     resourcePackManager->setStack(std::move(stack), (ResourcePackStackType) 3, false);
     Log::trace("Launcher", "Adding world resource packs");
     resourcePackRepo.addWorldResourcePacks(pathmgr.getWorldsPath().std() + props.worldDir.get());
@@ -154,7 +152,7 @@ int main(int argc, char *argv[]) {
             Log::debug("Launcher", "World has been saved.");
     }));
     Log::debug("Launcher", "Initializing ExternalFileLevelStorageSource");
-    Legacy::Pre_1_13::ExternalFileLevelStorageSource levelStorage (&pathmgr, saveTransactionManager);
+    ExternalFileLevelStorageSource levelStorage (&pathmgr, saveTransactionManager);
     Log::debug("Launcher", "Initializing ServerInstance");
     auto idleTimeout = std::chrono::seconds((int) (props.playerIdleTimeout * 60.f));
     IContentKeyProvider* keyProvider = &stubKeyProvider;
@@ -163,8 +161,7 @@ int main(int argc, char *argv[]) {
     };
     std::unique_ptr<EducationOptions> eduOptions (new EducationOptions(resourcePackManager));
     ServerInstanceEventCoordinator instanceEventCoordinator;
-    std::unique_ptr<Legacy::Pre_1_13::ServerInstance> instance (new Legacy::Pre_1_13::ServerInstance(minecraftApp, instanceEventCoordinator));
-    Log::debug("Launcher", "Initializing ServerInstance (Func)");
+    std::unique_ptr<ServerInstance> instance (new ServerInstance(minecraftApp, instanceEventCoordinator));
     instance->initializeServer(minecraftApp, whitelist, &permissionsFile, &pathmgr, idleTimeout, props.worldDir.get(), props.worldName.get(), props.motd.get(), levelSettings, props.viewDistance, true, { props.port, props.portV6, props.maxPlayers }, props.onlineMode, {}, "normal", *mce::UUID::EMPTY, eventing, resourcePackRepo, ctm, *resourcePackManager, createLevelStorageFunc, pathmgr.getWorldsPath(), nullptr, mcpe::string(), mcpe::string(), std::move(eduOptions), resourcePackManager, []() {
         Log::debug("Launcher", "Unloading level");
     }, []() {
@@ -176,7 +173,7 @@ int main(int argc, char *argv[]) {
     resLoadMgr.sync((ResourceLoadType) 4);
     resourcePackManager->onLanguageChanged();
     Log::info("Launcher", "Server initialized");
-    modLoader.onServerInstanceInitialized((ServerInstance*)instance.get());
+    modLoader.onServerInstanceInitialized(instance.get());
     instance->startServerThread();
 
     ConsoleReader reader;
