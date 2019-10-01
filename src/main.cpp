@@ -137,9 +137,6 @@ int main(int argc, char *argv[]) {
     std::unique_ptr<ResourcePackStack> stack (new ResourcePackStack());
     stack->add(PackInstance(resourcePackRepo.vanillaPack, -1, false, nullptr), resourcePackRepo, false);
     resourcePackManager->setStack(std::move(stack), (ResourcePackStackType) 3, false);
-    Log::trace("Launcher", "Adding world resource packs");
-    resourcePackRepo.addWorldResourcePacks(pathmgr.getWorldsPath().std() + props.worldDir.get());
-    resourcePackRepo.refreshPacks();
     Log::trace("Launcher", "Initializing Automation::AutomationClient");
     DedicatedServerMinecraftApp minecraftApp;
     Automation::AutomationClient aclient (minecraftApp);
@@ -166,7 +163,17 @@ int main(int argc, char *argv[]) {
     // LauncherV8Platform v8Platform;
     // v8::V8::InitializePlatform((v8::Platform*) &v8Platform);
     // v8::V8::Initialize();
-    instance->initializeServer(minecraftApp, whitelist, &permissionsFile, &pathmgr, idleTimeout, props.worldDir.get(), props.worldName.get(), props.motd.get(), levelSettings, props.viewDistance, true, { props.port, props.portV6, props.maxPlayers }, props.onlineMode, {}, "normal", *mce::UUID::EMPTY, eventing, resourcePackRepo, ctm, *resourcePackManager, createLevelStorageFunc, pathmgr.getWorldsPath(), nullptr, mcpe::string(), mcpe::string(), std::move(eduOptions), resourcePackManager, []() {
+    std::string worldspath =
+#ifndef __arm__
+    pathmgr.getWorldsPath().std() + "/"
+#else
+    "/games/com.mojang/minecraftWorlds/"
+#endif
+    ;
+    Log::trace("Launcher", "Adding world resource packs");
+    resourcePackRepo.addWorldResourcePacks(worldspath + props.worldDir.get());
+    resourcePackRepo.refreshPacks();
+    instance->initializeServer(minecraftApp, whitelist, &permissionsFile, &pathmgr, idleTimeout, props.worldDir.get(), props.worldName.get(), props.motd.get(), levelSettings, props.viewDistance, true, { props.port, props.portV6, props.maxPlayers }, props.onlineMode, {}, "normal", *mce::UUID::EMPTY, eventing, resourcePackRepo, ctm, *resourcePackManager, createLevelStorageFunc, worldspath, nullptr, mcpe::string(), mcpe::string(), std::move(eduOptions), resourcePackManager, []() {
         Log::debug("Launcher", "Unloading level");
     }, []() {
         Log::debug("Launcher", "Saving level");
