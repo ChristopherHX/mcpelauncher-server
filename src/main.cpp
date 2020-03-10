@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
         MinecraftUtils::setMallocZero();
 
     MinecraftUtils::setupForHeadless();
-    Log::Warn("Launcher", "Only Minecraft 1.12.0.28 and 1.12.1.1 are supported");
+    Log::warn("Launcher", "Only Minecraft 1.12.0.28 and 1.12.1.1 are supported");
 #ifdef __arm__
     // Get rid of defining OPENSSL_armcap
     hybris_hook("OPENSSL_cpuid_setup", (void*) + []() -> void {});
