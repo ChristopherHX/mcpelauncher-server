@@ -22,6 +22,7 @@
 #include <mcpelauncher/mod_loader.h>
 #include <argparser.h>
 #include <hybris/dlfcn.h>
+#include <hybris/hook.h>
 #include <minecraft/V8.h>
 #include "stub_key_provider.h"
 #include "server_properties.h"
